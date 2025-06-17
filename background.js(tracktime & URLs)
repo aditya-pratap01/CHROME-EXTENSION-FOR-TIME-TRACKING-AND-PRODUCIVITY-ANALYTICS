@@ -1,0 +1,22 @@
+let activeTabId = null;
+let startTime = null;
+
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  if (activeTabId !== null) {
+    const timeSpent = Date.now() - startTime;
+    const tab = await chrome.tabs.get(activeTabId);
+    const domain = new URL(tab.url).hostname;
+    saveTime(domain, timeSpent);
+  }
+
+  activeTabId = activeInfo.tabId;
+  startTime = Date.now();
+});
+
+async function saveTime(domain, timeSpent) {
+  fetch("http://localhost:5000/api/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ domain, timeSpent })
+  });
+}
