@@ -1,0 +1,25 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const Activity = require('./models/Activity');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+mongoose.connect('mongodb://localhost:27017/tracker');
+
+app.post('/api/track', async (req, res) => {
+  const { domain, timeSpent } = req.body;
+  await Activity.create({ domain, timeSpent });
+  res.sendStatus(200);
+});
+
+app.get('/api/analytics', async (req, res) => {
+  const data = await Activity.aggregate([
+    { $group: { _id: "$domain", total: { $sum: "$timeSpent" } } }
+  ]);
+  res.json(data);
+});
+
+app.listen(5000, () => console.log("Server running on 5000"));
