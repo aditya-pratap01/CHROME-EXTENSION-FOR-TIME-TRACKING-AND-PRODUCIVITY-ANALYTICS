@@ -1,0 +1,29 @@
+import { useEffect, useState } from "react";
+
+function Dashboard() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/analytics")
+      .then(res => res.json())
+      .then(setData);
+  }, []);
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Weekly Productivity</h1>
+      {data.map(entry => (
+        <div key={entry._id} className={`p-2 ${isProductive(entry._id) ? "bg-green-100" : "bg-red-100"}`}>
+          {entry._id}: {(entry.total / 1000).toFixed(1)}s
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function isProductive(domain) {
+  const productiveSites = ["github.com", "stackoverflow.com", "leetcode.com"];
+  return productiveSites.includes(domain);
+}
+
+export default Dashboard;
